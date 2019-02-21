@@ -12,6 +12,8 @@ namespace prhlt {
         load_input_image(ex_input_image_file_name);
         LOG4CXX_INFO(logger,"<<Loaded Input Image>>");
         this->approx_dist_error=-1;
+        this->max_dist=100;
+        this->enclosing_rect=false;
         if (ex_extract_image_file_name == "")
           ex_extract_image_file_name = ex_input_image_file_name;
         load_extract_image(ex_extract_image_file_name);
@@ -26,6 +28,8 @@ namespace prhlt {
       this->logger = Logger::getLogger("Polyline_Extractor");
       LOG4CXX_INFO(logger,"<<Instantiating POLYLINE EXTRACTOR>>");
         this->approx_dist_error=-1;
+        this->max_dist=100;
+        this->enclosing_rect=false;
       if(ex_input_mat.channels()>1){
           this->input_mat = cv::Mat(ex_input_mat.rows,ex_input_mat.cols,CV_8U,cv::Scalar(0,0,0));
           cvtColor(ex_input_mat, this->input_mat, CV_RGB2GRAY);
@@ -163,9 +167,12 @@ namespace prhlt {
     run();
   }
 
-  void Polyline_Extractor::run(vector < vector <cv::Point> > ex_regions, vector < vector < vector <cv::Point> > > ex_baselines, int  ex_num_workers, float ex_dist_error){
+  void Polyline_Extractor::run(vector < vector <cv::Point> > ex_regions, vector < vector < vector <cv::Point> > > ex_baselines, int  ex_num_workers, float ex_dist_error,bool ex_enclosing_rect, int ex_max_dist){
     this->num_workers = ex_num_workers;
     this->approx_dist_error=ex_dist_error;
+    this->max_dist=ex_max_dist;
+    this->enclosing_rect=ex_enclosing_rect;
+    
     LOG4CXX_INFO(logger,"<<RUNNING WITH SEARCH AREAS>>");
       cout << "Num Lines " << ex_baselines[0].size() << endl;
     calculate_search_areas(ex_regions,ex_baselines);
@@ -206,13 +213,17 @@ namespace prhlt {
       if(ex_baselines[i].size()>0)
       {
         cv::Rect current_rect = cv::boundingRect(ex_baselines[i][0]);
-        //LOG4CXX_INFO(this->logger,"<<Last RECT          : " << last_rect.y << " - " << last_rect.x << " : " << last_rect.height   << " - " << last_rect.width);
-        //LOG4CXX_INFO(this->logger,"<<Current RECT          : " << current_rect.y << " - " << current_rect.x << " : " << current_rect.height   << " - " << current_rect.width);
-        //cv::Rect fun_times(current_rect.x,last_rect.y,current_rect.width,abs(current_rect.y-last_rect.y)+current_rect.height);
-        //LOG4CXX_INFO(this->logger,"<<Result RECT          : " << fun_times.y << " - " << fun_times.x << " : " << fun_times.height   << " - " << fun_times.width);
-        this->search_areas[i].push_back(cv::Rect(current_rect.x,last_rect.y,current_rect.width,abs(current_rect.y-last_rect.y)+current_rect.height));
-
+        LOG4CXX_INFO(this->logger,"<<Last RECT          : " << last_rect.y << " - " << last_rect.x << " : " << last_rect.height   << " - " << last_rect.width);
+        LOG4CXX_INFO(this->logger,"<<Current RECT          : " << current_rect.y << " - " << current_rect.x << " : " << current_rect.height   << " - " << current_rect.width);
+        cv::Rect fun_times(current_rect.x,last_rect.y,current_rect.width,abs(current_rect.y-last_rect.y)+current_rect.height);
+        LOG4CXX_INFO(this->logger,"<<Result RECT          : " << fun_times.y << " - " << fun_times.x << " : " << fun_times.height   << " - " << fun_times.width);
+        int first_dist=this->max_dist; 
+        if(abs(current_rect.y-last_rect.y)+current_rect.height<this->max_dist )
+        	first_dist=abs(current_rect.y-last_rect.y)-1; 
+        this->search_areas[i].push_back(cv::Rect(current_rect.x,current_rect.y-first_dist,current_rect.width,first_dist));
+        
         last_rect = current_rect;
+        
         for(int j = 1; j < ex_baselines[i].size(); j++)
         {
           current_rect = cv::boundingRect(ex_baselines[i][j]);
@@ -225,8 +236,14 @@ namespace prhlt {
         }
         //LOG4CXX_INFO(this->logger,"<<Last RECT          : " << region_rect.y << " - " << region_rect.x << " : " << region_rect.height   << " - " << region_rect.width);
         //LOG4CXX_INFO(this->logger,"<<Current RECT          : " << last_rect.y << " - " << last_rect.x << " : " << last_rect.height   << " - " << last_rect.width);
-        this->search_areas[i].push_back(cv::Rect(last_rect.x,last_rect.y,last_rect.width,abs((last_rect.y)-(region_rect.y+region_rect.height-1))));
-        LOG4CXX_INFO(this->logger,"<<CALC : " << last_rect.y << " - " << (region_rect.y+region_rect.height-1));
+        int last_dist = last_rect.y+this->max_dist;
+        if(abs(last_rect.y-(region_rect.y+region_rect.height-1))<this->max_dist)
+        	last_dist=region_rect.y+region_rect.height-1;
+        	
+        this->search_areas[i].push_back(cv::Rect(last_rect.x,last_rect.y,last_rect.width,abs((last_rect.y)-(last_dist))));
+        LOG4CXX_INFO(this->logger,"<<CALC : " << last_rect.y << " - " << (last_dist));
+      //		int age;
+      //	cin >> age;
       }
     }
   }
@@ -440,9 +457,18 @@ namespace prhlt {
       tmp_contour.insert(tmp_contour.end(),upper_frontier.begin(),upper_frontier.end());
       tmp_contour.insert(tmp_contour.end(),lower_frontier.rbegin(),lower_frontier.rend());
       vector <cv::Point>  tmp_contour2;
+	  cv::Point2f tmp_contour3[4];
       float tmp_distance =  this->approx_dist_error== -1 ? arcLength(tmp_contour,true)*0.005 : this->approx_dist_error;
       approxPolyDP(tmp_contour,tmp_contour2,tmp_distance,true);
-    
+      if(this->enclosing_rect)
+	  {
+      	minAreaRect(tmp_contour2).points(tmp_contour3);
+      	tmp_contour2.clear();
+      	for(int p = 0; p < 4; p++)
+	  	{
+	  	  tmp_contour2.push_back(cv::Point(int(tmp_contour3[p].x),int(tmp_contour3[p].y)));
+	  	}
+	  }
       this->line_contours[i].push_back(tmp_contour2);
 
     }

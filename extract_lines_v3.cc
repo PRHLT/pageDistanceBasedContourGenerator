@@ -111,7 +111,8 @@ int main(int argc, char **argv)
 {
 
 	string input_image,extract_image,output_file,page_file,operation_mode,distance_function;
-	int curvature_ratio,verbosity,workers;
+	int curvature_ratio,verbosity,workers,max_dist;
+	bool rect_selected=false; 
 	float direct_distance_constant,approx_dist,diagonal_distance_constant;
 	string extract_file;
 
@@ -128,6 +129,8 @@ int main(int argc, char **argv)
 		( "delta,d", po::value<float>(&direct_distance_constant)->default_value(0.95509), "Direct distance constant to be used for the WDTOCS calculation (by default 0.95509)")
 		( "beta,b", po::value<float>(&diagonal_distance_constant)->default_value(1.3693), "Diagonal distance constant to be used for the WDTOCS calculation (by default 1.36930)")
 		( "approx_dist,x", po::value<float>(&approx_dist)->default_value(-1), "Allowed distance difference between the actual calculated frontier and the simplified approximation (by default -1 -> automatically calculates distance based on polygon size)")
+		( "enclosing_rect,e",po::bool_switch(&rect_selected),"Return the enclosing rectangle of the detected extraction polygon instead of the actual polygon (Default false)")
+		( "max_dist,s",po::value<int>(&max_dist)->default_value(100),"Maximum allowed distance between baseline and upper/lower region frontier for the first and last baselines of a region (by default 100)")
 		( "output_file,o", po::value<string>(&output_file)->default_value("output.xml"),"Base name for the lines images to be saved (by default image)" )
 		( "verbosity,v", po::value<int>(&verbosity)->default_value(0), "\% Verbosity os messages during execution [0-2]");
 	po::variables_map vm;
@@ -162,7 +165,7 @@ int main(int argc, char **argv)
 				LOG4CXX_INFO(logger,"<<CLEANING PAGE>>");
 				prhlt::Polyline_Extractor extractor_instance(orig_temp,orig_temp);
 				extractor_instance.set_distance_map_parameters(vm["curvature_ratio"].as<int>(),vm["delta"].as<float>(), vm["beta"].as<float>());
-				extractor_instance.run(sorted_reg,sorted_bs,vm["workers"].as<int>(),vm["approx_dist"].as<float>());
+				extractor_instance.run(sorted_reg,sorted_bs,vm["workers"].as<int>(),vm["approx_dist"].as<float>(),vm["enclosing_rect"].as<bool>(),vm["max_dist"].as<int>());
 
 				page.load_external_contours(extractor_instance.get_line_contours());
 				page.save_xml(vm["output_file"].as<string>());
