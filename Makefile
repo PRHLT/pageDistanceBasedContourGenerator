@@ -14,7 +14,7 @@ EXTERNAL_LIBS = $(AUTO_LIBS) $(MANUAL_LIBS)
 
 #--------------------------------------------------------------------------------------
 
-INTERNAL_EXTRACT_LINES_V3_LIBS= $(COMMONDIR)/page_file.o $(COMMONDIR)/algorithm_extract_polygons.o $(COMMONDIR)/pugixml.o $(COMMONDIR)/points_file.o $(COMMONDIR)/algorithm_distance_map.o $(COMMONDIR)/algorithm_wdtocs.o $(COMMONDIR)/algorithm_dtocs.o $(COMMONDIR)/image.o $(COMMONDIR)/algorithm_otsu.o $(COMMONDIR)/grey_level_histogram.o $(COMMONDIR)/line_histogram.o $(COMMONDIR)/algorithm_kmeans.o $(COMMONDIR)/algorithm_sauvola.o $(COMMONDIR)/algorithm_dp_path_finder.o $(COMMONDIR)/line_region_list.o $(COMMONDIR)/algorithm_dbosch.o $(COMMONDIR)/algorithm_rlsa.o $(COMMONDIR)/polyline_extractor.o
+INTERNAL_EXTRACT_LINES_V3_LIBS= $(COMMONDIR)/page_file.o $(COMMONDIR)/algorithm_calculate_search_area.o $(COMMONDIR)/algorithm_extract_polygons.o $(COMMONDIR)/pugixml.o $(COMMONDIR)/points_file.o $(COMMONDIR)/algorithm_distance_map.o $(COMMONDIR)/algorithm_wdtocs.o $(COMMONDIR)/algorithm_dtocs.o $(COMMONDIR)/image.o $(COMMONDIR)/algorithm_otsu.o $(COMMONDIR)/grey_level_histogram.o $(COMMONDIR)/line_histogram.o $(COMMONDIR)/algorithm_kmeans.o $(COMMONDIR)/algorithm_sauvola.o $(COMMONDIR)/algorithm_dp_path_finder.o $(COMMONDIR)/line_region_list.o $(COMMONDIR)/algorithm_dbosch.o $(COMMONDIR)/algorithm_rlsa.o $(COMMONDIR)/polyline_extractor.o
 
 #--------------------------------------------------------------------------------------
 COPTIONS = -c -O3 -o
@@ -36,6 +36,9 @@ line_histogram.o: line_histogram.cc line_histogram.hpp algorithm_kmeans.hpp
 
 extract_lines_v3.o: $(SOURCES_EXTRACT_LINES_V3)
 	$(CXX) $(COPTIONS) $@ $< $(INCLUDE)
+
+algorithm_calculate_search_area.o: algorithm_calculate_search_area.cc algorithm_calculate_search_area.hpp
+	$(CXX) $(OPTIONS) $@ $< $(INCLUDE)
 
 algorithm_distance_map.o: algorithm_distance_map.cc algorithm_distance_map.hpp
 	$(CXX) $(OPTIONS) $@ $< $(INCLUDE)

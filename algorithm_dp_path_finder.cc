@@ -69,40 +69,40 @@ namespace prhlt {
 		this->upper_search_limits=ex_upper_limits;
 		this->lower_search_limits=ex_lower_limits;
     LOG4CXX_INFO(this->logger,"<<Setting all search limits >>");
-        //show_search_area();
+    //show_search_area();
 		calculate_valid_search_area();
 	}
   void Algorithm_DP_Path_Finder::set_search_limits(vector <cv::Point> ex_upper_limits, vector <cv::Point> ex_lower_limits){
     this->upper_search_limits.push_back(ex_upper_limits);
     this->lower_search_limits.push_back(ex_lower_limits);
     LOG4CXX_INFO(this->logger,"<<Setting all search limits >>");
-        //show_search_area();
+    //show_search_area();
     calculate_valid_search_area();
   }
 
 	void Algorithm_DP_Path_Finder::set_lower_search_limits(vector < vector <cv::Point> > ex_lower_limits){
 		this->lower_search_limits=ex_lower_limits;
     LOG4CXX_INFO(this->logger,"<<Setting lower search limits >>");
-        //show_search_area();
+    //show_search_area();
 		calculate_valid_search_area();
 	}
   void Algorithm_DP_Path_Finder::set_lower_search_limits(vector <cv::Point> ex_lower_limits){
     this->lower_search_limits.push_back(ex_lower_limits);
         LOG4CXX_INFO(this->logger,"<<Set lower search limits >>");
-        //show_search_area();
+    //show_search_area();
     calculate_valid_search_area();
   }
 
   void Algorithm_DP_Path_Finder::set_upper_search_limits(vector < vector <cv::Point> > ex_upper_limits){
     this->upper_search_limits=ex_upper_limits;
         LOG4CXX_INFO(this->logger,"<<Set upper search limits >>");
-        //show_search_area();
+    //show_search_area();
     calculate_valid_search_area();
   }
   void Algorithm_DP_Path_Finder::set_upper_search_limits(vector <cv::Point> ex_upper_limits){
     this->upper_search_limits.push_back(ex_upper_limits);
         LOG4CXX_INFO(this->logger,"<<Set upper search limits >>");
-        //show_search_area();
+    //show_search_area();
     calculate_valid_search_area();
   }
 	void Algorithm_DP_Path_Finder::calculate_valid_search_area(){
@@ -128,14 +128,16 @@ namespace prhlt {
         		}
             }
         }
-        LOG4CXX_DEBUG(this->logger,"Area   total : " << this->cost_matrix.cols() * this->cost_matrix.rows());
-        LOG4CXX_DEBUG(this->logger,"Points total : " << points.size());
+        LOG4CXX_INFO(this->logger,"Area   total : " << this->cost_matrix.cols() * this->cost_matrix.rows());
+        LOG4CXX_INFO(this->logger,"Points total : " << points.size());
         int i;
+        
         this->image.draw_randomed_colored_region(points);
-        this->image.draw_line(cv::Point2d(this->lower_search_limits[0][0].x-this->axis_y,this->lower_search_limits[0][0].y-this->axis_x),cv::Point2d(this->lower_search_limits[0][1].x-this->axis_y,this->lower_search_limits[0][1].y-this->axis_x),cv::Scalar(255,0,0));
+        //this->image.draw_line(cv::Point2d(this->lower_search_limits[0][0].x-this->axis_y,this->lower_search_limits[0][0].y-this->axis_x),cv::Point2d(this->lower_search_limits[0][1].x-this->axis_y,this->lower_search_limits[0][1].y-this->axis_x),cv::Scalar(255,0,0));
 		points.clear();
-        this->image.display_with_scale("SEARCH",2.0,5000, true);
-        //cin >> i;
+    LOG4CXX_INFO(this->logger, "DISPLAY");
+    this->image.display_with_scale("SEARCH", 2.0, 5000, true);
+    //cin >> i;
 	}
 
     Algorithm_DP_Path_Finder::~Algorithm_DP_Path_Finder(){
@@ -166,8 +168,8 @@ namespace prhlt {
         this->average_grey_distance_cost /= (double)(this->cost_matrix.cols()*this->cost_matrix.rows());
         LOG4CXX_DEBUG(this->logger,"Average : Grey cost : "<< this->average_grey_distance_cost    << " Euclidean: " << this->average_euclidian_distance_cost);
 		   // this->image.display_with_scale("PATH FINDER", 0.5, 10000000,false);
-        //save_best_path();
-        //display_best_path();
+       //save_best_path();
+       //display_best_path();
     }
     void Algorithm_DP_Path_Finder::reset_change_counter(){
     	this->cells_changed = 0;
@@ -442,7 +444,7 @@ namespace prhlt {
                 //tmp.push_back(cv::Point2d(current_point.y,current_point.x));
                 //tmp.push_back(cv::Point2d(current_point.y+this->axis_y,current_point.x+this->axis_x));
             LOG4CXX_DEBUG(this->logger,"Added");
-           // display_path(this->best_path);
+           //display_path(this->best_path);
         }
 		    return tmp;
 	}
@@ -478,7 +480,8 @@ namespace prhlt {
 
     void Algorithm_DP_Path_Finder::display_best_path(){
     	vector<cv::Point2d> tmp = recover_best_path();
-    	//this->image.draw_randomed_colored_region(tmp);
+      LOG4CXX_INFO(this->logger, "SIZE " << tmp.size());
+      //this->image.draw_randomed_colored_region(tmp);
       this->image.draw_randomed_colored_polyline(tmp);
     	this->image.display_with_scale("PATH FINDER", 2.0, 10000000,false);
     	tmp.clear();
