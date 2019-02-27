@@ -16,6 +16,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <Eigen/Core>
 #include <Eigen/Eigen>
+#include <Eigen/Geometry>
 
 //namespace std {using namespace __gnu_cxx;}
 using namespace std;
@@ -32,24 +33,25 @@ namespace prhlt {
             void save_distance_matrix_to_file(string ex_filename);
             void save_image_matrix_to_file(string ex_filename);
         protected:
-            cv::Mat image;
-            log4cxx::LoggerPtr logger;
-            int curvature_ratio;
-            Eigen::MatrixXd distance_matrix;
-            void initialize_border();
-            bool distance_matrix_changed_flag;
-            void activate_distance_matrix_changed_flag();
-            void reset_distance_matrix_changed_flag();
-            void calculate_distance_map();
-            void initialize_distance_matrix(int threshold);
-            void initialize_distance_matrix(cv::Mat ex_frontier_mat);
-            void forward_raster_sequence();
-            void update_value_forward(int r,int c);
-            void backward_raster_sequence();
-            void update_value_backward(int r,int c);
-            float get_minimum_for_update(int r1, int c1, int r2, int c2);
-            virtual float calculate_neighbour_value(int r1,int c1, int r2, int c2);
-            bool solution_converged();
+          float scale; 
+          cv::Mat image;
+          log4cxx::LoggerPtr logger;
+          int curvature_ratio;
+          Eigen::MatrixXd distance_matrix;
+          void initialize_border();
+          bool distance_matrix_changed_flag;
+          void activate_distance_matrix_changed_flag();
+          void reset_distance_matrix_changed_flag();
+          void calculate_distance_map();
+          void initialize_distance_matrix(int threshold);
+          void initialize_distance_matrix(cv::Mat ex_frontier_mat);
+          void forward_raster_sequence();
+          void update_value_forward(int r, int c);
+          void backward_raster_sequence();
+          void update_value_backward(int r, int c);
+          float get_minimum_for_update(int r1, int c1, int r2, int c2);
+          virtual float calculate_neighbour_value(int r1, int c1, int r2, int c2);
+          bool solution_converged();
     };
 }
 

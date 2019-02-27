@@ -159,7 +159,7 @@ namespace prhlt {
     }
     
     MatrixXd Algorithm_Distance_Map::get_distance_matrix(){
-        return this->distance_matrix;
+         return this->distance_matrix;
     }
     
     void Algorithm_Distance_Map::save_image_matrix_to_file(string ex_filename){

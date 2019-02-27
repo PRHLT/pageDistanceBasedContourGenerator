@@ -30,7 +30,7 @@ class Polyline_Extractor
     ~Polyline_Extractor();
     void run(string line_region_file_name);
     void run(vector<int> region_limits, vector<vector<vector<cv::Point> > > limits);
-    void run(vector<vector<cv::Point> > ex_regions, vector<vector<vector<cv::Point> > > ex_baselines, int ex_num_workers = 1, float ex_approx_dist = -1, bool ex_enclosing_rect = false, int max_dist = 100);
+    void run(vector<vector<cv::Point> > ex_regions, vector<vector<vector<cv::Point> > > ex_baselines, int ex_num_workers = 1, float ex_approx_dist = -1, bool ex_enclosing_rect = false, int up_dist = 100, int low_dist = 50);
     void run(vector<int> region_limits, cv::Mat ex_limits_mat);
     void set_frontier_calculation_parameters(float ex_standard_deviation_contant, float ex_dynamic_range_constant, int ex_window_size);
     void set_distance_map_parameters(int ex_curv_ratio, float ex_delta, float ex_beta);
@@ -48,7 +48,8 @@ class Polyline_Extractor
     int num_workers;
     vector<thread *> threads;
     bool enclosing_rect;
-    int max_dist;
+    int up_dist;
+    int low_dist;
     float approx_dist_error;
     float standard_deviation_constant;
     float dynamic_range_constant;

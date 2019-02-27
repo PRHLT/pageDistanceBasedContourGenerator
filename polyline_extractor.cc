@@ -14,7 +14,8 @@ Polyline_Extractor::Polyline_Extractor(string ex_input_image_file_name, string e
   load_input_image(ex_input_image_file_name);
   //LOG4CXX_INFO(logger, "<<Loaded Input Image>>");
   this->approx_dist_error = -1;
-  this->max_dist = 100;
+  this->up_dist = 100;
+  this->low_dist = 25;
   this->enclosing_rect = false;
   if (ex_extract_image_file_name == "")
     ex_extract_image_file_name = ex_input_image_file_name;
@@ -32,7 +33,8 @@ Polyline_Extractor::Polyline_Extractor(cv::Mat ex_input_mat, cv::Mat ex_extract_
   this->logger = Logger::getLogger("Polyline_Extractor");
   LOG4CXX_INFO(logger, "<<Instantiating POLYLINE EXTRACTOR>>");
   this->approx_dist_error = -1;
-  this->max_dist = 100;
+  this->up_dist = 100;
+  this->low_dist = 25;
   this->enclosing_rect = false;
   if (ex_input_mat.channels() > 1)
   {
@@ -182,11 +184,12 @@ void Polyline_Extractor::run(vector<int> region_limits, vector<vector<vector<cv:
   run();
 }
 
-void Polyline_Extractor::run(vector<vector<cv::Point> > ex_regions, vector<vector<vector<cv::Point > > > ex_baselines, int ex_num_workers, float ex_dist_error, bool ex_enclosing_rect, int ex_max_dist)
+void Polyline_Extractor::run(vector<vector<cv::Point> > ex_regions, vector<vector<vector<cv::Point > > > ex_baselines, int ex_num_workers, float ex_dist_error, bool ex_enclosing_rect, int ex_up_dist, int ex_low_dist)
 {
   this->num_workers = ex_num_workers;
   this->approx_dist_error = ex_dist_error;
-  this->max_dist = ex_max_dist;
+  this->up_dist = ex_up_dist;
+  this->low_dist = ex_low_dist;
   this->enclosing_rect = ex_enclosing_rect;
 
   LOG4CXX_INFO(logger, "<<RUNNING WITH SEARCH AREAS>>");
@@ -247,7 +250,7 @@ void Polyline_Extractor::calculate_search_areas(vector<vector<cv::Point> > ex_re
       int first_dist = abs(current_rect.y - last_rect.y) - 1;
       if(is_too_far_above(current_rect,top_rect_frontier))
       {
-        first_dist = this->max_dist; 
+        first_dist = this->up_dist; 
       }
 
       this->search_areas[i].push_back(cv::Rect(current_rect.x, current_rect.y - first_dist, current_rect.width, first_dist));
@@ -270,9 +273,10 @@ void Polyline_Extractor::calculate_search_areas(vector<vector<cv::Point> > ex_re
           //	  max_y=current_rect.y+current_rect.height-this->max_dist;
           int min_x = last_rect.x <= current_rect.x ? last_rect.x : current_rect.x;
           int min_y = last_rect.y <= current_rect.y ? last_rect.y : current_rect.y;
-          int current_dist = abs(max_y - min_y) > this->max_dist ? this->max_dist : abs(max_y - min_y);
+          int current_low_dist = abs(max_y - min_y) > this->low_dist ? this->low_dist : abs(max_y - min_y);
+          int current_dist = abs(max_y - min_y) > this->up_dist ? this->up_dist : abs(max_y - min_y);
           //this->search_areas[i].push_back(cv::Rect(cv::Point(min_x, min_y), cv::Point(max_x, max_y)));
-          this->search_areas[i].push_back(cv::Rect(last_calc_rect.x, last_calc_rect.y + last_calc_rect.height, last_calc_rect.width, current_dist));
+          this->search_areas[i].push_back(cv::Rect(last_calc_rect.x, last_calc_rect.y + last_calc_rect.height, last_calc_rect.width, current_low_dist));
           //LOG4CXX_INFO(this->logger, "<<OVERLAP DOWN >> ");
           //show_rectangle(this->search_areas[i][this->search_areas[i].size() - 1]);
           //this->search_areas[i].push_back(cv::Rect(cv::Point(min_x, min_y), cv::Point(max_x, max_y)));
@@ -283,10 +287,10 @@ void Polyline_Extractor::calculate_search_areas(vector<vector<cv::Point> > ex_re
         }
         else
         {
-          this->search_areas[i].push_back(cv::Rect(last_rect.x, last_rect.y, last_rect.width, this->max_dist));
+          this->search_areas[i].push_back(cv::Rect(last_rect.x, last_rect.y, last_rect.width, this->low_dist));
           //LOG4CXX_INFO(this->logger, "<<SINGLE DOWN >> ");
           //show_rectangle(this->search_areas[i][this->search_areas[i].size() - 1]);
-          this->search_areas[i].push_back(cv::Rect(current_rect.x,current_rect.y-this->max_dist,current_rect.width,this->max_dist));
+          this->search_areas[i].push_back(cv::Rect(current_rect.x,current_rect.y-this->up_dist,current_rect.width,this->up_dist));
           last_calc_rect = this->search_areas[i][this->search_areas[i].size() - 1];
           //LOG4CXX_INFO(this->logger, "<<SINGLE UP >> ");
           //show_rectangle(this->search_areas[i][this->search_areas[i].size() - 1]);
@@ -299,7 +303,7 @@ void Polyline_Extractor::calculate_search_areas(vector<vector<cv::Point> > ex_re
       int last_dist = last_dist = region_rect.y + region_rect.height - 1;
 
       if(is_too_far_below(last_rect,bottom_rect_frontier)){
-        last_dist = last_rect.y + this->max_dist;
+        last_dist = last_rect.y + this->low_dist;
       }
 
       this->search_areas[i].push_back(cv::Rect(last_rect.x, last_rect.y, last_rect.width, abs((last_rect.y) - (last_dist))));
@@ -314,12 +318,12 @@ void Polyline_Extractor::calculate_search_areas(vector<vector<cv::Point> > ex_re
 
 bool Polyline_Extractor::is_too_far_above(cv::Rect current_rect, cv::Rect compared_to)
 {
-  if (compared_to.y+compared_to.height-current_rect.y <= -this->max_dist)
+  if (compared_to.y+compared_to.height-current_rect.y <= -this->up_dist)
     return true;
   return false; 
 }
 bool Polyline_Extractor::is_too_far_below(cv::Rect current_rect, cv::Rect compared_to){
-  if(current_rect.y + current_rect.height - compared_to.y <= -this->max_dist )
+  if(current_rect.y + current_rect.height - compared_to.y <= -this->low_dist )
     return true;
   return false; 
 }
@@ -539,7 +543,7 @@ void Polyline_Extractor::calculate_distance_matrix()
   dbosch_instance.run(this->curvature_ratio, this->sauvola_mat, this->delta, this->beta);
   //cv::Mat temp = dbosch_instance.get_distance_matrix_as_greyscale_image();
   //this->global_output_image.load_from_matrix(temp);
-  //LOG4CXX_INFO(this->logger,"SAVING DISTANCE MAP");
+  LOG4CXX_INFO(this->logger,"SAVING DISTANCE MAP");
   //dbosch_instance.save_distance_matrix_to_file("distance_mat.txt");
   //this->global_output_image.save_image("distance_map.png");
   this->distance_mat = dbosch_instance.get_distance_matrix();
