@@ -247,11 +247,11 @@ void Polyline_Extractor::calculate_search_areas(vector<vector<cv::Point> > ex_re
     {
       cv::Rect current_rect = cv::boundingRect(ex_baselines[i][0]);
       
-      int first_dist = abs(current_rect.y - last_rect.y) - 1;
-      if(is_too_far_above(current_rect,top_rect_frontier))
-      {
-        first_dist = this->up_dist; 
-      }
+      //int first_dist = abs(current_rect.y - last_rect.y) - 1;
+      //if(is_too_far_above(current_rect,top_rect_frontier))
+     // {
+       int  first_dist = this->up_dist; 
+      //}
 
       this->search_areas[i].push_back(cv::Rect(current_rect.x, current_rect.y - first_dist, current_rect.width, first_dist));
       last_calc_rect = this->search_areas[i][this->search_areas[i].size() - 1];
@@ -263,6 +263,7 @@ void Polyline_Extractor::calculate_search_areas(vector<vector<cv::Point> > ex_re
       for (int j = 1; j < ex_baselines[i].size(); j++)
       {
         current_rect = cv::boundingRect(ex_baselines[i][j]);
+        /*
         if(it_overlaps(current_rect,last_rect))
         {
           //LOG4CXX_INFO(this->logger, "<<Last RECT          : " << region_rect.y << " - " << region_rect.x << " : " << region_rect.height << " - " << region_rect.width);
@@ -286,7 +287,7 @@ void Polyline_Extractor::calculate_search_areas(vector<vector<cv::Point> > ex_re
           //show_rectangle(this->search_areas[i][this->search_areas[i].size() - 1]);
         }
         else
-        {
+        {*/
           this->search_areas[i].push_back(cv::Rect(last_rect.x, last_rect.y, last_rect.width, this->low_dist));
           //LOG4CXX_INFO(this->logger, "<<SINGLE DOWN >> ");
           //show_rectangle(this->search_areas[i][this->search_areas[i].size() - 1]);
@@ -294,17 +295,17 @@ void Polyline_Extractor::calculate_search_areas(vector<vector<cv::Point> > ex_re
           last_calc_rect = this->search_areas[i][this->search_areas[i].size() - 1];
           //LOG4CXX_INFO(this->logger, "<<SINGLE UP >> ");
           //show_rectangle(this->search_areas[i][this->search_areas[i].size() - 1]);
-        }
+        //}
     
         last_rect = current_rect;
         //last_rect = this->search_areas[i][j];
       }
 
-      int last_dist = last_dist = region_rect.y + region_rect.height - 1;
+      //int last_dist = last_dist = region_rect.y + region_rect.height - 1;
 
-      if(is_too_far_below(last_rect,bottom_rect_frontier)){
-        last_dist = last_rect.y + this->low_dist;
-      }
+      //if(is_too_far_below(last_rect,bottom_rect_frontier)){
+        int last_dist = last_rect.y + this->low_dist;
+      //}
 
       this->search_areas[i].push_back(cv::Rect(last_rect.x, last_rect.y, last_rect.width, abs((last_rect.y) - (last_dist))));
       //LOG4CXX_INFO(this->logger, "<<LAST UP >> ");
