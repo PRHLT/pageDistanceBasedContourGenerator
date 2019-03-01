@@ -6,6 +6,7 @@ namespace prhlt {
     using namespace boost;
     using namespace Eigen;
     Algorithm_Distance_Map::Algorithm_Distance_Map(cv::Mat & ex_image){
+    	this->min_change=1; 
         this->logger = Logger::getLogger("PRHLT.Algorithm_Distance_Map");
         if(ex_image.channels()>1){
             this->image = cv::Mat(ex_image.rows,ex_image.cols,CV_8U,cv::Scalar(0,0,0));
@@ -102,7 +103,7 @@ namespace prhlt {
         }
         if(c>=1)
             this->distance_matrix(r,c)=get_minimum_for_update(r,c,r,c-1);
-        if(abs(old_value - this->distance_matrix(r,c))>=0.00001)
+        if(abs(old_value - this->distance_matrix(r,c))>=this->min_change)
             activate_distance_matrix_changed_flag();
     }
     void Algorithm_Distance_Map::update_value_backward(int r,int c){
@@ -117,7 +118,9 @@ namespace prhlt {
         }
         if(c<this->distance_matrix.cols()-1)
             this->distance_matrix(r,c)=get_minimum_for_update(r,c,r,c+1);
-        if(old_value!=this->distance_matrix(r,c))
+        //if(old_value!=this->distance_matrix(r,c))
+        //    activate_distance_matrix_changed_flag();
+        if(abs(old_value - this->distance_matrix(r,c))>=this->min_change)
             activate_distance_matrix_changed_flag();
     }
     float Algorithm_Distance_Map::get_minimum_for_update(int r1, int c1, int r2, int c2){

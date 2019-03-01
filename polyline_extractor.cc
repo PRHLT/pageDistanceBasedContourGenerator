@@ -17,6 +17,7 @@ Polyline_Extractor::Polyline_Extractor(string ex_input_image_file_name, string e
   this->up_dist = 100;
   this->low_dist = 25;
   this->enclosing_rect = false;
+  this->horizontal_padding=0;
   if (ex_extract_image_file_name == "")
     ex_extract_image_file_name = ex_input_image_file_name;
   load_extract_image(ex_extract_image_file_name);
@@ -36,6 +37,7 @@ Polyline_Extractor::Polyline_Extractor(cv::Mat ex_input_mat, cv::Mat ex_extract_
   this->up_dist = 100;
   this->low_dist = 25;
   this->enclosing_rect = false;
+  this->horizontal_padding=0;
   if (ex_input_mat.channels() > 1)
   {
     this->input_mat = cv::Mat(ex_input_mat.rows, ex_input_mat.cols, CV_8U, cv::Scalar(0, 0, 0));
@@ -184,13 +186,14 @@ void Polyline_Extractor::run(vector<int> region_limits, vector<vector<vector<cv:
   run();
 }
 
-void Polyline_Extractor::run(vector<vector<cv::Point> > ex_regions, vector<vector<vector<cv::Point > > > ex_baselines, int ex_num_workers, float ex_dist_error, bool ex_enclosing_rect, int ex_up_dist, int ex_low_dist)
+void Polyline_Extractor::run(vector<vector<cv::Point> > ex_regions, vector<vector<vector<cv::Point > > > ex_baselines, int ex_num_workers, float ex_dist_error, bool ex_enclosing_rect, int ex_up_dist, int ex_low_dist, int ex_horizontal_padding)
 {
   this->num_workers = ex_num_workers;
   this->approx_dist_error = ex_dist_error;
   this->up_dist = ex_up_dist;
   this->low_dist = ex_low_dist;
   this->enclosing_rect = ex_enclosing_rect;
+  this->horizontal_padding=ex_horizontal_padding;
 
   LOG4CXX_INFO(logger, "<<RUNNING WITH SEARCH AREAS>>");
   //cout << "Num Lines " << ex_baselines[0].size() << endl;
@@ -235,7 +238,7 @@ vector<vector<vector<cv::Point> > > Polyline_Extractor::get_line_contours()
 void Polyline_Extractor::calculate_search_areas(vector<vector<cv::Point> > ex_regions, vector<vector<vector<cv::Point> > > ex_baselines)
 {
   this->search_areas.resize(ex_regions.size());
-
+  int horizontal_padding = this->horizontal_padding; 
   for (int i = 0; i < ex_regions.size(); i++)
   {
     cv::Rect region_rect = cv::boundingRect(ex_regions[i]);
@@ -253,7 +256,7 @@ void Polyline_Extractor::calculate_search_areas(vector<vector<cv::Point> > ex_re
        int  first_dist = this->up_dist; 
       //}
 
-      this->search_areas[i].push_back(cv::Rect(current_rect.x, current_rect.y - first_dist, current_rect.width, first_dist));
+      this->search_areas[i].push_back(cv::Rect(current_rect.x-horizontal_padding, current_rect.y - first_dist, current_rect.width+horizontal_padding, first_dist));
       last_calc_rect = this->search_areas[i][this->search_areas[i].size() - 1];
       last_rect = current_rect;
       //LOG4CXX_INFO(this->logger, "<<FIRST UP >> ");
@@ -288,10 +291,10 @@ void Polyline_Extractor::calculate_search_areas(vector<vector<cv::Point> > ex_re
         }
         else
         {*/
-          this->search_areas[i].push_back(cv::Rect(last_rect.x, last_rect.y, last_rect.width, this->low_dist));
+          this->search_areas[i].push_back(cv::Rect(last_rect.x-horizontal_padding, last_rect.y, last_rect.width+horizontal_padding, this->low_dist));
           //LOG4CXX_INFO(this->logger, "<<SINGLE DOWN >> ");
           //show_rectangle(this->search_areas[i][this->search_areas[i].size() - 1]);
-          this->search_areas[i].push_back(cv::Rect(current_rect.x,current_rect.y-this->up_dist,current_rect.width,this->up_dist));
+          this->search_areas[i].push_back(cv::Rect(current_rect.x-horizontal_padding,current_rect.y-this->up_dist,current_rect.width+horizontal_padding,this->up_dist));
           last_calc_rect = this->search_areas[i][this->search_areas[i].size() - 1];
           //LOG4CXX_INFO(this->logger, "<<SINGLE UP >> ");
           //show_rectangle(this->search_areas[i][this->search_areas[i].size() - 1]);
@@ -307,7 +310,7 @@ void Polyline_Extractor::calculate_search_areas(vector<vector<cv::Point> > ex_re
         int last_dist = last_rect.y + this->low_dist;
       //}
 
-      this->search_areas[i].push_back(cv::Rect(last_rect.x, last_rect.y, last_rect.width, abs((last_rect.y) - (last_dist))));
+      this->search_areas[i].push_back(cv::Rect(last_rect.x-horizontal_padding, last_rect.y, last_rect.width+horizontal_padding, abs((last_rect.y) - (last_dist))));
       //LOG4CXX_INFO(this->logger, "<<LAST UP >> ");
       //show_rectangle(this->search_areas[i][this->search_areas[i].size() - 1]);
       //LOG4CXX_INFO(this->logger, "<<CALC : " << last_rect.y << " - " << (last_dist));

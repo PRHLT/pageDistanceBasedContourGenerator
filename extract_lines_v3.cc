@@ -111,7 +111,7 @@ int main(int argc, char **argv)
 {
 
 	string input_image,extract_image,output_file,page_file,operation_mode,distance_function;
-	int curvature_ratio,verbosity,workers,up_dist,low_dist;
+	int curvature_ratio,verbosity,workers,up_dist,low_dist,horizontal_padding;
 	bool rect_selected=false; 
 	float direct_distance_constant,approx_dist,diagonal_distance_constant;
 	string extract_file;
@@ -132,6 +132,7 @@ int main(int argc, char **argv)
 		( "enclosing_rect,e",po::bool_switch(&rect_selected),"Return the enclosing rectangle of the detected extraction polygon instead of the actual polygon (Default false)")
 		( "upper_dist,u",po::value<int>(&up_dist)->default_value(100),"Maximum allowed distance above baseline for upper region frontier calculation (by default 100)")
 		( "lower_dist,l",po::value<int>(&low_dist)->default_value(25),"Maximum allowed distance below baseline for lower region frontier calculation (by default 25)")
+		( "horizontal_padding,g",po::value<int>(&horizontal_padding)->default_value(0),"Horizontal padding added to baselines to increase search areas in case of issues with the baseline quality (by default 0)")
 		( "output_file,o", po::value<string>(&output_file)->default_value("output.xml"),"Base name for the lines images to be saved (by default image)" )
 		( "verbosity,v", po::value<int>(&verbosity)->default_value(0), "\% Verbosity os messages during execution [0-2]");
 	po::variables_map vm;
@@ -166,7 +167,7 @@ int main(int argc, char **argv)
 				LOG4CXX_INFO(logger,"<<CLEANING PAGE>>");
 				prhlt::Polyline_Extractor extractor_instance(orig_temp,orig_temp);
 				extractor_instance.set_distance_map_parameters(vm["curvature_ratio"].as<int>(),vm["delta"].as<float>(), vm["beta"].as<float>());
-				extractor_instance.run(sorted_reg, sorted_bs, vm["workers"].as<int>(), vm["approx_dist"].as<float>(), vm["enclosing_rect"].as<bool>(), vm["upper_dist"].as<int>(), vm["lower_dist"].as<int>());
+				extractor_instance.run(sorted_reg, sorted_bs, vm["workers"].as<int>(), vm["approx_dist"].as<float>(), vm["enclosing_rect"].as<bool>(), vm["upper_dist"].as<int>(), vm["lower_dist"].as<int>(),vm["horizontal_padding"].as<int>());
 
 				page.load_external_contours(extractor_instance.get_line_contours());
 				page.save_xml(vm["output_file"].as<string>());

@@ -33,6 +33,7 @@ namespace prhlt {
             void save_distance_matrix_to_file(string ex_filename);
             void save_image_matrix_to_file(string ex_filename);
         protected:
+          float min_change; 
           float scale; 
           cv::Mat image;
           log4cxx::LoggerPtr logger;
