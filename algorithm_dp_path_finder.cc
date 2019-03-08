@@ -136,7 +136,7 @@ namespace prhlt {
         //this->image.draw_line(cv::Point2d(this->lower_search_limits[0][0].x-this->axis_y,this->lower_search_limits[0][0].y-this->axis_x),cv::Point2d(this->lower_search_limits[0][1].x-this->axis_y,this->lower_search_limits[0][1].y-this->axis_x),cv::Scalar(255,0,0));
 		points.clear();
     LOG4CXX_INFO(this->logger, "DISPLAY");
-    this->image.display_with_scale("SEARCH", 2.0, 5000, true);
+    this->image.display_with_scale("SEARCH", 2.0,-1, true);
     //cin >> i;
 	}
 
@@ -462,7 +462,10 @@ namespace prhlt {
             }
         }
         if(min_cost< 0){
-          show_search_area();
+          LOG4CXX_ERROR(this->logger,"NO PATH WAS FOUND DUE TO RESTRICTIONS" );
+          vector<cv::Point2d> res; 
+          //show_search_area();
+          return res; 
         }
         //int i;
         //cin >> i;

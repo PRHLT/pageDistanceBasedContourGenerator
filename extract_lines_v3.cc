@@ -169,7 +169,9 @@ int main(int argc, char **argv)
 				extractor_instance.set_distance_map_parameters(vm["curvature_ratio"].as<int>(),vm["delta"].as<float>(), vm["beta"].as<float>());
 				extractor_instance.run(sorted_reg, sorted_bs, vm["workers"].as<int>(), vm["approx_dist"].as<float>(), vm["enclosing_rect"].as<bool>(), vm["upper_dist"].as<int>(), vm["lower_dist"].as<int>(),vm["horizontal_padding"].as<int>());
 
+				LOG4CXX_INFO(logger,"<<HERE>>");
 				page.load_external_contours(extractor_instance.get_line_contours());
+				LOG4CXX_INFO(logger,"<<THERE>>");
 				page.save_xml(vm["output_file"].as<string>());
 			}
 			else

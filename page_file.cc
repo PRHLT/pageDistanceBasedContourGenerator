@@ -256,6 +256,8 @@ namespace prhlt{
 					}
 					this->baselines[this->baselines.size()-1].push_back(temp_baseline);
 					coord_mean_y /= coord_count;
+    				//LOG4CXX_INFO(this->logger,"ORDER : " << max_coord_y << " got here " <<  this->baseline_order[this->baseline_order.size()-1].size());
+
 					this->baseline_order[this->baseline_order.size()-1].push_back(std::make_pair(max_coord_y,this->baseline_order[this->baseline_order.size()-1].size()));
 					this->line_nodes[this->line_nodes.size()-1].push_back(line_region);
 				}
@@ -340,14 +342,18 @@ namespace prhlt{
 		    {
 
 		        int bs_ind = this->baseline_order[reg_ind][i].second;
-				LOG4CXX_DEBUG(logger,"loading contour ["<<j<<"]["<<i<<"] into ["<<reg_ind<<"]["<<bs_ind<<"]");
-            pugi::xml_attribute line_points_attr = this->line_nodes[reg_ind][bs_ind].child("Coords").attribute("points");
-            LOG4CXX_DEBUG(logger,"GOT NODE");
+		        int bs_ind_aux = this->baseline_order[reg_ind][i].first;
+				LOG4CXX_INFO(logger,"loading contour ["<<j<<"]["<<i<<"] into ["<<reg_ind<<"]["<<bs_ind<<"]["<<bs_ind_aux<<"]");
+            pugi::xml_attribute line_points_attr = this->line_nodes[reg_ind][i].child("Coords").attribute("points");
+            LOG4CXX_INFO(logger,"GOT NODE");
             //line_points_attr.set_value(point_vectors_to_string(ex_contours[j][i]).c_str());
-                //LOG4CXX_DEBUG(logger,"SAVING : " << strange_point_vectors_to_string(ex_contours[j][i]));
-            line_points_attr.set_value(strange_point_vectors_to_string(ex_contours[j][i]).c_str());
+            if(ex_contours[j][i].size() > 0){
+            	LOG4CXX_INFO(logger,"SAVING : " << strange_point_vectors_to_string(ex_contours[j][i]));
+            	line_points_attr.set_value(strange_point_vectors_to_string(ex_contours[j][i]).c_str());
+			}
 
-                LOG4CXX_DEBUG(logger,"SAVED CONTOUR");
+        	LOG4CXX_DEBUG(logger,"SAVED CONTOUR");
+
 
         }
     }

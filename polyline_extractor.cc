@@ -291,10 +291,10 @@ void Polyline_Extractor::calculate_search_areas(vector<vector<cv::Point> > ex_re
         }
         else
         {*/
-          this->search_areas[i].push_back(cv::Rect(last_rect.x-horizontal_padding, last_rect.y, last_rect.width+horizontal_padding, this->low_dist));
+          this->search_areas[i].push_back(cv::Rect(last_rect.x-horizontal_padding, last_rect.y+last_rect.height, last_rect.width+horizontal_padding, last_rect.height+this->low_dist));
           //LOG4CXX_INFO(this->logger, "<<SINGLE DOWN >> ");
           //show_rectangle(this->search_areas[i][this->search_areas[i].size() - 1]);
-          this->search_areas[i].push_back(cv::Rect(current_rect.x-horizontal_padding,current_rect.y-this->up_dist,current_rect.width+horizontal_padding,this->up_dist));
+          this->search_areas[i].push_back(cv::Rect(current_rect.x-horizontal_padding,current_rect.y+current_rect.height-this->up_dist,current_rect.width+horizontal_padding,this->up_dist));
           last_calc_rect = this->search_areas[i][this->search_areas[i].size() - 1];
           //LOG4CXX_INFO(this->logger, "<<SINGLE UP >> ");
           //show_rectangle(this->search_areas[i][this->search_areas[i].size() - 1]);
@@ -460,6 +460,7 @@ void Polyline_Extractor::calculate_single_line_frontier_with_search_area(int i, 
   //LOG4CXX_DEBUG(this->logger, "<<Launching search >>");
   path_finder_instance.run(1.0, 1.0);
   //LOG4CXX_DEBUG(this->logger, "<<Done >>");
+  LOG4CXX_INFO(this->logger, "<<RECOVERING BEST PATH >> " << i << " - " << j);
   this->area_polylines[i][j] = path_finder_instance.recover_best_path();
   //LOG4CXX_DEBUG(logger, "Calculating Collision Points ");
   this->area_collision_points[i][j] = path_finder_instance.get_best_path_collision_points();
@@ -626,18 +627,25 @@ void Polyline_Extractor::calculate_line_contour(int i, int j)
   cv::Point2f tmp_contour3[4];
   float tmp_distance = this->approx_dist_error == -1 ? arcLength(tmp_contour, true) * 0.005 : this->approx_dist_error;
   //LOG4CXX_ERROR(logger, "BEFORE SIMP " << tmp_contour.size());
-  approxPolyDP(tmp_contour, tmp_contour2, tmp_distance, true);
-  //LOG4CXX_ERROR(logger, "SIMPLIFIED CONTOUR");
-  if (this->enclosing_rect)
-  {
-    minAreaRect(tmp_contour2).points(tmp_contour3);
-    tmp_contour2.clear();
-    for (int p = 0; p < 4; p++)
-    {
-      tmp_contour2.push_back(cv::Point(int(tmp_contour3[p].x), int(tmp_contour3[p].y)));
-    }
+  if(tmp_contour.size() > 0 && upper_frontier.size() > 0 && lower_frontier.size() > 0 ){
+ 	 approxPolyDP(tmp_contour, tmp_contour2, tmp_distance, true);
+  	//LOG4CXX_ERROR(logger, "SIMPLIFIED CONTOUR");
+  	if (this->enclosing_rect)
+  	{
+    	minAreaRect(tmp_contour2).points(tmp_contour3);
+    	tmp_contour2.clear();
+    	for (int p = 0; p < 4; p++)
+    	{
+     	 tmp_contour2.push_back(cv::Point(int(tmp_contour3[p].x), int(tmp_contour3[p].y)));
+    	}
+  	}
+  	this->line_contours[i].push_back(tmp_contour2);
   }
-  this->line_contours[i].push_back(tmp_contour2);
+  else{
+  	vector<cv::Point> tmp_contour5;
+  	  this->line_contours[i].push_back(tmp_contour5);
+  }
+
 }
 
 vector<cv::Point> Polyline_Extractor::vector_2d_to_simp(const vector<cv::Point2d> &aux_vector)
@@ -978,7 +986,7 @@ void Polyline_Extractor::show_rectangle(cv::Rect ex_rect)
   cv::Mat tmp = this->global_input_image.get_matrix();
   this->global_output_image.load_from_matrix(tmp);
   this->global_output_image.draw_rectangle(ex_rect, cv::Scalar(0, 0, 255));
-  this->global_output_image.display_with_scale("Rectangle", 1.0, 500000, true);
+  this->global_output_image.display_with_scale("Rectangle", 0.5, 500000, true);
 }
 
 void Polyline_Extractor::show_lines(vector<vector<cv::Point> > ex_lines)
