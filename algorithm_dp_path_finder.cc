@@ -69,7 +69,7 @@ namespace prhlt {
 		this->upper_search_limits=ex_upper_limits;
 		this->lower_search_limits=ex_lower_limits;
     LOG4CXX_INFO(this->logger,"<<Setting all search limits >>");
-    //show_search_area();
+//    show_search_area();
 		calculate_valid_search_area();
 	}
   void Algorithm_DP_Path_Finder::set_search_limits(vector <cv::Point> ex_upper_limits, vector <cv::Point> ex_lower_limits){
@@ -83,26 +83,26 @@ namespace prhlt {
 	void Algorithm_DP_Path_Finder::set_lower_search_limits(vector < vector <cv::Point> > ex_lower_limits){
 		this->lower_search_limits=ex_lower_limits;
     LOG4CXX_INFO(this->logger,"<<Setting lower search limits >>");
-    //show_search_area();
+//    show_search_area();
 		calculate_valid_search_area();
 	}
   void Algorithm_DP_Path_Finder::set_lower_search_limits(vector <cv::Point> ex_lower_limits){
     this->lower_search_limits.push_back(ex_lower_limits);
         LOG4CXX_INFO(this->logger,"<<Set lower search limits >>");
-    //show_search_area();
+//    show_search_area();
     calculate_valid_search_area();
   }
 
   void Algorithm_DP_Path_Finder::set_upper_search_limits(vector < vector <cv::Point> > ex_upper_limits){
     this->upper_search_limits=ex_upper_limits;
         LOG4CXX_INFO(this->logger,"<<Set upper search limits >>");
-    //show_search_area();
+//    show_search_area();
     calculate_valid_search_area();
   }
   void Algorithm_DP_Path_Finder::set_upper_search_limits(vector <cv::Point> ex_upper_limits){
     this->upper_search_limits.push_back(ex_upper_limits);
         LOG4CXX_INFO(this->logger,"<<Set upper search limits >>");
-    //show_search_area();
+//    show_search_area();
     calculate_valid_search_area();
   }
 	void Algorithm_DP_Path_Finder::calculate_valid_search_area(){

@@ -51,6 +51,7 @@ namespace prhlt {
       void load_external_contours(vector <vector< vector <cv::Point> > > const &ex_contours );
 			void clip_baselines();
 			void print_old_format();
+			void generate_fixed_countour_from_baseline(int descendent_offset, int ascendant_offset );
 			void generate_countour_from_baseline(int descendent_offset, int ascendant_offset );
 			void generate_countour_from_baseline(string line_id,int descendent_offset, int ascendant_offset );
 			void generate_countour_from_baseline_interline_mode(int interline_mode, int descendent_percent, int ascendant_percent );

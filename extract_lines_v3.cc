@@ -1,3 +1,4 @@
+#include "page_file.hpp"
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
@@ -15,7 +16,6 @@
 #include "polyline_extractor.hpp"
 #include "points_file.hpp"
 #include "algorithm_extract_polygons.hpp"
-#include "page_file.hpp"
 
 namespace po = boost::program_options;
 using namespace std;
@@ -110,7 +110,7 @@ void displayInputedValues(po::variables_map vm){
 int main(int argc, char **argv)
 {
 
-	string input_image,extract_image,output_file,page_file,operation_mode,distance_function;
+	string input_image,extract_image,output_file,page_file_name,operation_mode,distance_function;
 	int curvature_ratio,verbosity,workers,up_dist,low_dist,horizontal_padding;
 	bool rect_selected=false; 
 	float direct_distance_constant,approx_dist,diagonal_distance_constant;
@@ -122,7 +122,7 @@ int main(int argc, char **argv)
 		( "help,h", "Generates this help message" )
 		( "input_image,i", po::value<string>(&input_image)->default_value("image.jpg"),"Input image on which to calculate the text line contour or extract the lines as per the contours in the XML file(by default ./image.jpg)" )
 		//( "extract_image,e", po::value<string>(&extract_image)->default_value(""),"Image from which to perform the extraction (by default same as input image)" )
-		( "page_file,p", po::value<string>(&page_file)->default_value("page.xml"),"File path to XML in page format containing baselines for which to calculate the contours (by default ./page.xml)" )
+		( "page_file,p", po::value<string>(&page_file_name)->default_value("page.xml"),"File path to XML in page format containing baselines for which to calculate the contours (by default ./page.xml)" )
 		( "operation_mode,m", po::value<string>(&operation_mode)->default_value("CALCULATE"), "Operation modes of the command line tool: calculate the extraction polygon (CALCULATE), extract the lines to individual images (EXTRACT) or save in ICDAR competition format (ICDAR) (default value is CALCULATE)")
 		( "curvature_ratio,a", po::value<int>(&curvature_ratio)->default_value(1), "Curvature ratio to be used for the DTOCS and WDTOCS calculation (by default 1)")
 		( "workers,w", po::value<int>(&workers)->default_value(1), "Number of parallel working threads to use on line extraction frontier calculation (by default 1)")
@@ -162,20 +162,19 @@ int main(int argc, char **argv)
 				//page.generate_countour_from_baseline(30,-70);
 				vector <vector< vector <cv::Point> > >  sorted_bs = page.get_sorted_baselines();
 				vector <vector <cv::Point> > sorted_reg = page.get_sorted_regions();
-				page.generate_countour_from_baseline(60,-100);
+				page.generate_fixed_countour_from_baseline(vm["lower_dist"].as<int>(),-vm["upper_dist"].as<int>());
 				//page.save_xml("test.xml");
 				LOG4CXX_INFO(logger,"<<CLEANING PAGE>>");
 				prhlt::Polyline_Extractor extractor_instance(orig_temp,orig_temp);
 				extractor_instance.set_distance_map_parameters(vm["curvature_ratio"].as<int>(),vm["delta"].as<float>(), vm["beta"].as<float>());
 				extractor_instance.run(sorted_reg, sorted_bs, vm["workers"].as<int>(), vm["approx_dist"].as<float>(), vm["enclosing_rect"].as<bool>(), vm["upper_dist"].as<int>(), vm["lower_dist"].as<int>(),vm["horizontal_padding"].as<int>());
 
-				LOG4CXX_INFO(logger,"<<HERE>>");
 				page.load_external_contours(extractor_instance.get_line_contours());
-				LOG4CXX_INFO(logger,"<<THERE>>");
 				page.save_xml(vm["output_file"].as<string>());
 			}
 			else
 			{
+
 				if(vm["operation_mode"].as<string>()=="EXTRACT")
 				{
 					LOG4CXX_INFO(logger,"<<SAVING TEXT LINE IMAGES TO FILE>>");

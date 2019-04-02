@@ -9,7 +9,7 @@ using namespace Eigen;
 
 Polyline_Extractor::Polyline_Extractor(string ex_input_image_file_name, string ex_extract_image_file_name)
 {
-  this->logger = Logger::getLogger("Polyline_Extractor");
+  this->logger = Logger::getLogger("PRHLT.Polyline_Extractor");
   LOG4CXX_INFO(logger, "<<Instantiating POLYLINE EXTRACTOR>>");
   load_input_image(ex_input_image_file_name);
   //LOG4CXX_INFO(logger, "<<Loaded Input Image>>");
@@ -31,7 +31,7 @@ Polyline_Extractor::Polyline_Extractor(string ex_input_image_file_name, string e
 
 Polyline_Extractor::Polyline_Extractor(cv::Mat ex_input_mat, cv::Mat ex_extract_mat)
 {
-  this->logger = Logger::getLogger("Polyline_Extractor");
+  this->logger = Logger::getLogger("PRHLT.Polyline_Extractor");
   LOG4CXX_INFO(logger, "<<Instantiating POLYLINE EXTRACTOR>>");
   this->approx_dist_error = -1;
   this->up_dist = 100;
@@ -52,19 +52,7 @@ Polyline_Extractor::Polyline_Extractor(cv::Mat ex_input_mat, cv::Mat ex_extract_
   set_default_constant_values();
   LOG4CXX_INFO(logger, "<<DONE>>");
 }
-/*  cv::Mat mask = cv::Mat::zeros(this->image.rows,this->image.cols, CV_8UC1);
-        drawContours(mask,contour_vector,j,cv::Scalar(255), CV_FILLED);
-        cv::Mat transparent( this->image.rows,this->image.cols, CV_8UC4);
-        cv::Mat srcImg[] = {this->image,mask};
-        int from_to[] = { 0,0, 1,1, 2,2, 3,3 };
-        cv::mixChannels( srcImg, 2, &transparent, 1, from_to, 4 );
-        cv::Mat cropped_image;
-        cv::Mat(transparent,this->bounding_rectangles[i][j]).copyTo(cropped_image);
-        this->line_images[this->line_images.size()-1].push_back(cropped_image);
-        cropped_image.release();
-        mask.release();
-        transparent.release();
-            */
+
 void Polyline_Extractor::load_input_image(string ex_input_image_file_name)
 {
   this->input_image_file_name = ex_input_image_file_name;
@@ -291,7 +279,7 @@ void Polyline_Extractor::calculate_search_areas(vector<vector<cv::Point> > ex_re
         }
         else
         {*/
-          this->search_areas[i].push_back(cv::Rect(last_rect.x-horizontal_padding, last_rect.y+last_rect.height, last_rect.width+horizontal_padding, last_rect.height+this->low_dist));
+          this->search_areas[i].push_back(cv::Rect(last_rect.x-horizontal_padding, last_rect.y+last_rect.height, last_rect.width+horizontal_padding, last_rect.height+this->low_dist+ (this->low_dist < last_rect.height ? last_rect.height : 0 )));
           //LOG4CXX_INFO(this->logger, "<<SINGLE DOWN >> ");
           //show_rectangle(this->search_areas[i][this->search_areas[i].size() - 1]);
           this->search_areas[i].push_back(cv::Rect(current_rect.x-horizontal_padding,current_rect.y+current_rect.height-this->up_dist,current_rect.width+horizontal_padding,this->up_dist));
@@ -307,11 +295,11 @@ void Polyline_Extractor::calculate_search_areas(vector<vector<cv::Point> > ex_re
       //int last_dist = last_dist = region_rect.y + region_rect.height - 1;
 
       //if(is_too_far_below(last_rect,bottom_rect_frontier)){
-        int last_dist = last_rect.y + this->low_dist;
+        int last_dist = last_rect.y + this->low_dist + (this->low_dist < last_rect.height ? last_rect.height : 0 );
       //}
 
       this->search_areas[i].push_back(cv::Rect(last_rect.x-horizontal_padding, last_rect.y, last_rect.width+horizontal_padding, abs((last_rect.y) - (last_dist))));
-      //LOG4CXX_INFO(this->logger, "<<LAST UP >> ");
+      //LOG4CXX_INFO(this->logger, "<<LAST DOWN >> ");
       //show_rectangle(this->search_areas[i][this->search_areas[i].size() - 1]);
       //LOG4CXX_INFO(this->logger, "<<CALC : " << last_rect.y << " - " << (last_dist));
       //		int age;

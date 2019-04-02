@@ -1,12 +1,6 @@
 #ifndef POLYLINE_EXTRACTOR_HPP_9F3UIS3QOP
 #define POLYLINE_EXTRACTOR_HPP_9F3UIS3QOP
 
-#include <log4cxx/logger.h>
-#include <log4cxx/basicconfigurator.h>
-#include <log4cxx/helpers/exception.h>
-#include <boost/thread.hpp>
-#include <iostream>
-#include <fstream>
 #include "algorithm_dbosch.hpp"
 #include "algorithm_sauvola.hpp"
 #include "algorithm_otsu.hpp"
@@ -15,6 +9,12 @@
 #include "algorithm_calculate_search_area.hpp"
 #include "line_region_list.hpp"
 #include "image.hpp"
+#include <boost/thread.hpp>
+#include <log4cxx/logger.h>
+#include <log4cxx/basicconfigurator.h>
+#include <log4cxx/helpers/exception.h>
+#include <iostream>
+#include <fstream>
 #include <opencv2/core/core.hpp>
 
 //namespace std {using namespace __gnu_cxx;}
