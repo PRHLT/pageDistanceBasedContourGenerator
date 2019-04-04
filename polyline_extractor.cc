@@ -408,10 +408,10 @@ void Polyline_Extractor::calculate_range_line_frontier_with_search_area(int i, i
 
 void Polyline_Extractor::calculate_single_line_frontier_with_search_area(int i, int j)
 {
-  //LOG4CXX_INFO(this->logger, "<<Instantiating >> " << i << " - " << j);
+  LOG4CXX_INFO(this->logger, "<<Instantiating >> " << i << " - " << j);
   cv::Mat tmp = this->global_input_image.get_matrix();
   prhlt::Algorithm_DP_Path_Finder path_finder_instance(tmp, this->distance_mat, this->search_areas[i][j]);
-  //LOG4CXX_INFO(this->logger, "<<Instantiating Done >> " << i << " - " << j);
+  LOG4CXX_INFO(this->logger, "<<Instantiating Done >> " << i << " - " << j);
 
   //show_rectangle(this->search_areas[i][j]);
   if (j == 0)
@@ -450,8 +450,9 @@ void Polyline_Extractor::calculate_single_line_frontier_with_search_area(int i, 
   //LOG4CXX_DEBUG(this->logger, "<<Done >>");
   LOG4CXX_INFO(this->logger, "<<RECOVERING BEST PATH >> " << i << " - " << j);
   this->area_polylines[i][j] = path_finder_instance.recover_best_path();
-  //LOG4CXX_DEBUG(logger, "Calculating Collision Points ");
+  LOG4CXX_INFO(logger, "Calculating Collision Points ");
   this->area_collision_points[i][j] = path_finder_instance.get_best_path_collision_points();
+  LOG4CXX_INFO(logger, "Calculating Collision Points DONE");
   //LOG4CXX_DEBUG(logger, "Calculating Collision Points - ENDED " << this->collision_points.size());
   tmp.release();
 }
