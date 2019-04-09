@@ -111,7 +111,7 @@ int main(int argc, char **argv)
 {
 
 	string input_image,extract_image,output_file,page_file_name,operation_mode,distance_function;
-	int curvature_ratio,verbosity,workers,up_dist,low_dist,horizontal_padding;
+	int curvature_ratio,verbosity,workers,up_dist,low_dist,horizontal_padding,default_up,default_down;
 	bool rect_selected=false; 
 	float direct_distance_constant,approx_dist,diagonal_distance_constant;
 	string extract_file;
@@ -124,12 +124,14 @@ int main(int argc, char **argv)
 		//( "extract_image,e", po::value<string>(&extract_image)->default_value(""),"Image from which to perform the extraction (by default same as input image)" )
 		( "page_file,p", po::value<string>(&page_file_name)->default_value("page.xml"),"File path to XML in page format containing baselines for which to calculate the contours (by default ./page.xml)" )
 		( "operation_mode,m", po::value<string>(&operation_mode)->default_value("CALCULATE"), "Operation modes of the command line tool: calculate the extraction polygon (CALCULATE), extract the lines to individual images (EXTRACT) or save in ICDAR competition format (ICDAR) (default value is CALCULATE)")
-		( "curvature_ratio,a", po::value<int>(&curvature_ratio)->default_value(1), "Curvature ratio to be used for the DTOCS and WDTOCS calculation (by default 1)")
+		( "curvature_ratio,c", po::value<int>(&curvature_ratio)->default_value(1), "Curvature ratio to be used for the DTOCS and WDTOCS calculation (by default 1)")
 		( "workers,w", po::value<int>(&workers)->default_value(1), "Number of parallel working threads to use on line extraction frontier calculation (by default 1)")
 		( "delta,d", po::value<float>(&direct_distance_constant)->default_value(0.95509), "Direct distance constant to be used for the WDTOCS calculation (by default 0.95509)")
-		( "beta,b", po::value<float>(&diagonal_distance_constant)->default_value(1.3693), "Diagonal distance constant to be used for the WDTOCS calculation (by default 1.36930)")
+		( "beta,t", po::value<float>(&diagonal_distance_constant)->default_value(1.3693), "Diagonal distance constant to be used for the WDTOCS calculation (by default 1.36930)")
 		( "approx_dist,x", po::value<float>(&approx_dist)->default_value(-1), "Allowed distance difference between the actual calculated frontier and the simplified approximation (by default -1 -> automatically calculates distance based on polygon size)")
 		( "enclosing_rect,e",po::bool_switch(&rect_selected),"Return the enclosing rectangle of the detected extraction polygon instead of the actual polygon (Default false)")
+		( "default_above,a",po::value<int>(&default_up)->default_value(25),"Default size of space above the baseline taken in case search fails  (by default 25)")
+		( "default_below,b",po::value<int>(&default_down)->default_value(25),"Default size of space below the baseline taken in case search fails (by default 25)")
 		( "upper_dist,u",po::value<int>(&up_dist)->default_value(100),"Maximum allowed distance above baseline for upper region frontier calculation (by default 100)")
 		( "lower_dist,l",po::value<int>(&low_dist)->default_value(25),"Maximum allowed distance below baseline for lower region frontier calculation (by default 25)")
 		( "horizontal_padding,g",po::value<int>(&horizontal_padding)->default_value(0),"Horizontal padding added to baselines to increase search areas in case of issues with the baseline quality (by default 0)")
@@ -162,7 +164,7 @@ int main(int argc, char **argv)
 				//page.generate_countour_from_baseline(30,-70);
 				vector <vector< vector <cv::Point> > >  sorted_bs = page.get_sorted_baselines();
 				vector <vector <cv::Point> > sorted_reg = page.get_sorted_regions();
-				page.generate_fixed_countour_from_baseline(vm["lower_dist"].as<int>(),-vm["upper_dist"].as<int>());
+				page.generate_fixed_countour_from_baseline(vm["default_below"].as<int>(),-vm["default_above"].as<int>());
 				//page.save_xml("test.xml");
 				LOG4CXX_INFO(logger,"<<CLEANING PAGE>>");
 				prhlt::Polyline_Extractor extractor_instance(orig_temp,orig_temp);
