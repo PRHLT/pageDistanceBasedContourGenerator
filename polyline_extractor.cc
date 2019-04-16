@@ -322,7 +322,9 @@ namespace prhlt
             this->area_collision_points[i].resize(this->search_areas[i].size());
             for (int j = 0; j < this->search_areas[i].size(); j++)
             {
+                LOG4CXX_INFO(this->logger, "AREA: " << i << " LINE: " << j);
                 calculate_single_line_frontier_with_search_area(i, j);
+                LOG4CXX_INFO(this->logger, "AREA: " << i << " LINE: " << j << " DONE");
             }
         }
     }
@@ -333,6 +335,7 @@ namespace prhlt
         this->area_polylines.resize(this->search_areas.size());
         this->area_collision_points.resize(this->search_areas.size());
         int work_load, work_remaining, at, from, to;
+        int launched_workers = 0; 
 
         for (int i = 0; i < this->search_areas.size(); i++)
         {
@@ -344,17 +347,21 @@ namespace prhlt
             at = 0;
 
             //cout << "Total " << this->search_areas[i].size() << " Work load: " << work_load << " work_remaining: " << work_remaining << endl;
-
+            for (int j = 0; j < launched_workers; ++j)
+            {
+                if (this->threads[j] != NULL)
+                    delete this->threads[j];
+            }
+            launched_workers = 0; 
+            //cout << "Cleaned past processes!" << endl; 
             for (int j = 0; j < this->num_workers; ++j)
             {
 
-                if (this->threads[j] != NULL)
-                    delete this->threads[j];
                 if (at < this->search_areas[i].size())
                 {
                     from = at;
                     to = at + max(work_load, 1) - 1;
-
+                    launched_workers++; 
                     if (j == this->num_workers - 1)
                         to += work_remaining;
                     //cout << "Region: " << i << " computing from: " << from << " to: " << to << endl;
@@ -362,11 +369,12 @@ namespace prhlt
                     at += max(work_load, 1);
                 }
             }
-            for (int j = 0; j < this->num_workers; ++j)
+            for (int j = 0; j < launched_workers; ++j)
             {
                 if (this->threads[j] != NULL)
                     this->threads[j]->join();
             }
+            //cout << "ALL PROCESSES FINISHED " << i << " : " << launched_workers << endl; 
         }
     }
     void Polyline_Extractor::calculate_range_line_frontier_with_search_area(int i, int from, int to)
