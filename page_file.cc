@@ -217,7 +217,9 @@ namespace prhlt{
             if(((string)text_region.attribute("type").value()) != "floating"){
                 permutation_indices tmp_order;
                 vector < vector < cv::Point> > tmp_points;
+                vector <string> tmp_strings;
                 this->baselines.push_back(tmp_points);
+                this->textline_text.push_back(tmp_strings); 
                 this->baseline_order.push_back(tmp_order);
                 vector <pugi::xml_node> tmp_nodes;
                 this->line_nodes.push_back(tmp_nodes);
@@ -235,6 +237,8 @@ namespace prhlt{
 
                     std::vector<std::string> string_values;
                     string point_string = line_region.child("Baseline").attribute("points").value();
+                    string line_transcription = (string) line_region.child("TextEquiv").child_value("Unicode");
+                    LOG4CXX_INFO(this->logger,"At line Id " << line_region.attribute("id").value() << " " << line_transcription);
                     LOG4CXX_DEBUG(this->logger,"At line Id " << line_region.attribute("id").value());
                     LOG4CXX_DEBUG(this->logger,"Coords are " << point_string);
                     if(point_string != ""){
@@ -254,6 +258,7 @@ namespace prhlt{
                             min_coord_y = ( y < min_coord_y) ? y : min_coord_y;
                             coord_mean_y += y;
                         }
+                        this->textline_text[this->textline_text.size()-1].push_back(line_transcription); 
                         this->baselines[this->baselines.size()-1].push_back(temp_baseline);
                         coord_mean_y /= coord_count;
                         //LOG4CXX_INFO(this->logger,"ORDER : " << max_coord_y << " got here " <<  this->baseline_order[this->baseline_order.size()-1].size());
@@ -344,7 +349,7 @@ namespace prhlt{
                 int bs_ind = this->baseline_order[reg_ind][i].second;
                 int bs_ind_aux = this->baseline_order[reg_ind][i].first;
                 LOG4CXX_INFO(logger,"loading contour ["<<j<<"]["<<i<<"] into ["<<reg_ind<<"]["<<bs_ind<<"]["<<bs_ind_aux<<"]");
-                pugi::xml_attribute line_points_attr = this->line_nodes[reg_ind][i].child("Coords").attribute("points");
+                pugi::xml_attribute line_points_attr = this->line_nodes[reg_ind][bs_ind].child("Coords").attribute("points");
                 LOG4CXX_INFO(logger,"GOT NODE");
                 //line_points_attr.set_value(point_vectors_to_string(ex_contours[j][i]).c_str());
                 if(ex_contours[j][i].size() > 0){
@@ -584,6 +589,15 @@ void Page_File::generate_fixed_countour_from_baseline(int descendent_offset, int
 
             clipLine(containing_rect, sorted_baseline[0], sorted_baseline[sorted_baseline.size()-1]);
             pugi::xml_attribute baseline_points_attr = this->line_nodes[j][i].child("Baseline").attribute("points");
+            this->line_nodes[j][i].child("TextEquiv").remove_child("Unicode");
+            pugi::xml_node line_transcription = this->line_nodes[j][i].child("TextEquiv").append_child("Unicode");
+            line_transcription.append_child(pugi::node_pcdata).set_value(this->textline_text[j][h].c_str());
+//            line_transcription.remove_child("Unicode"); 
+                    
+  //          pugi::xml_node text = this->line_nodes[k][h].append_child("TextEquiv").append_child("PlainText").append_child("Unicode");
+                    
+        //    text.append_child(pugi::node_pcdata).set_value(ex_text[line_count].c_str());
+
             baseline_points_attr.set_value(point_vectors_to_string(sorted_baseline).c_str());
 
             pugi::xml_attribute line_points_attr = this->line_nodes[j][i].child("Coords").attribute("points");

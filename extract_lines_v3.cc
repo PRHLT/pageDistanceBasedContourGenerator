@@ -165,7 +165,7 @@ int main(int argc, char **argv)
 				vector <vector< vector <cv::Point> > >  sorted_bs = page.get_sorted_baselines();
 				vector <vector <cv::Point> > sorted_reg = page.get_sorted_regions();
 				page.generate_fixed_countour_from_baseline(vm["default_below"].as<int>(),-vm["default_above"].as<int>());
-				//page.save_xml("test.xml");
+//				page.save_xml("test.xml");
 				LOG4CXX_INFO(logger,"<<CLEANING PAGE>>");
 				prhlt::Polyline_Extractor extractor_instance(orig_temp,orig_temp);
 				extractor_instance.set_distance_map_parameters(vm["curvature_ratio"].as<int>(),vm["delta"].as<float>(), vm["beta"].as<float>());

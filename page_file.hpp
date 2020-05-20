@@ -74,6 +74,7 @@ namespace prhlt {
     		permutation_indices region_order;
     		vector <permutation_indices> baseline_order;
     		vector <string> text;
+    		vector <vector <string> > textline_text;
             vector <vector< vector <cv::Point> > > contours;
             vector< vector <cv::Point2f> >  region_contours;
             vector <int> region_labels;
