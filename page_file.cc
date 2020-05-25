@@ -564,7 +564,7 @@ void Page_File::generate_fixed_countour_from_baseline(int descendent_offset, int
 
         for(int i = 0 ; i < this->baseline_order[j].size(); i++){
             int h = this->baseline_order[j][i].second;
-            vector<cv::Point> sorted_baseline=this->baselines[j][h];
+            vector<cv::Point> sorted_baseline=this->baselines[j][i];
             LOG4CXX_DEBUG(this->logger,"Reading line " << i << " In order : " << h << "That has num points : " << sorted_baseline.size());
             LOG4CXX_DEBUG(this->logger,"Reading line " << i << " In order : " << h << "That has num points : " << this->baselines[j][i].size());
             bottom = this->baselines[j][h][0].y;
@@ -591,7 +591,7 @@ void Page_File::generate_fixed_countour_from_baseline(int descendent_offset, int
             pugi::xml_attribute baseline_points_attr = this->line_nodes[j][i].child("Baseline").attribute("points");
             this->line_nodes[j][i].child("TextEquiv").remove_child("Unicode");
             pugi::xml_node line_transcription = this->line_nodes[j][i].child("TextEquiv").append_child("Unicode");
-            line_transcription.append_child(pugi::node_pcdata).set_value(this->textline_text[j][h].c_str());
+            line_transcription.append_child(pugi::node_pcdata).set_value(this->textline_text[j][i].c_str());
 //            line_transcription.remove_child("Unicode"); 
                     
   //          pugi::xml_node text = this->line_nodes[k][h].append_child("TextEquiv").append_child("PlainText").append_child("Unicode");
