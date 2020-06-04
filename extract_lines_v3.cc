@@ -115,6 +115,7 @@ int main(int argc, char **argv)
 	bool rect_selected=false; 
 	float direct_distance_constant,approx_dist,diagonal_distance_constant;
 	string extract_file;
+	string output_folder;
 
 	BasicConfigurator::configure();
 	po::options_description desc( "Allowed options" );
@@ -136,15 +137,13 @@ int main(int argc, char **argv)
 		( "lower_dist,l",po::value<int>(&low_dist)->default_value(25),"Maximum allowed distance below baseline for lower region frontier calculation (by default 25)")
 		( "horizontal_padding,g",po::value<int>(&horizontal_padding)->default_value(0),"Horizontal padding added to baselines to increase search areas in case of issues with the baseline quality (by default 0)")
 		( "output_file,o", po::value<string>(&output_file)->default_value("output.xml"),"Base name for the lines images to be saved (by default image)" )
+		( "output_folder,f", po::value<string>(&output_folder)->default_value(""),"The folder to which extracted lines will be stored in EXTRACT mode, default=<folder-of-input-image>" )
 		( "verbosity,v", po::value<int>(&verbosity)->default_value(0), "\% Verbosity os messages during execution [0-2]");
 	po::variables_map vm;
 	po::store( po::parse_command_line( argc, argv, desc ), vm ); // to read command line options
 	po::notify( vm );
 
 	setVerbosity(vm["verbosity"].as<int>());
-
-
-
 
 	if (vm.count("help"))
 		std::cout << desc << std::endl;
@@ -183,7 +182,7 @@ int main(int argc, char **argv)
 					prhlt::Page_File page(vm["page_file"].as<string>(),"contours");
 					page.load_image(orig_temp);
 
-					page.extract_line_images();
+					page.extract_line_images(output_folder);
 
 				}
 				else

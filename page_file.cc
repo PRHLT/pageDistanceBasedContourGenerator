@@ -927,7 +927,7 @@ void Page_File::load_image(cv::Mat ex_image){
     LOG4CXX_DEBUG(this->logger," mean " << this->mean_grey[0]);
 }
 
-void Page_File::extract_line_images(){
+void Page_File::extract_line_images(string output_dir){
     string base_name = this->file_name;
     unsigned found = this->file_name.find_last_of(".");
     LOG4CXX_DEBUG(this->logger," Found . at " << found);
@@ -935,7 +935,19 @@ void Page_File::extract_line_images(){
         base_name.erase(found,-1);
     generate_line_images_with_alpha();
     //generate_line_images();
-    save_line_images(base_name);
+
+    //save_line_images(base_name);
+    string out_path=base_name;
+    if (!output_dir.empty()) {
+        if(boost::filesystem::create_directory(boost::filesystem::path(output_dir.c_str()))) {
+            LOG4CXX_DEBUG(this->logger, "output directory created: " << output_dir);
+        }
+    	LOG4CXX_DEBUG(this->logger, "output_dir = " << output_dir);
+
+        out_path = output_dir+"/"+base_name;
+    }
+
+    save_line_images(out_path);
 }
 
 void Page_File::generate_line_images(){

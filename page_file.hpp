@@ -8,6 +8,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/multi_array.hpp>
+#include <boost/filesystem.hpp>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -34,7 +35,7 @@ namespace prhlt {
 			vector<int> get_all_regions_labels();
 			void load_image(cv::Mat image);
 			void display_contours_and_boxes();
-			void extract_line_images();
+			void extract_line_images(string output_dir="");
 			int  calculate_mode_interline_space();
 			void print_file_info();
 			void add_text(vector<string> ex_text);
